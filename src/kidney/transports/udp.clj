@@ -7,15 +7,20 @@
 
 (defn localhost [] (. InetAddress getLocalHost))
 
-(defn- listen [ch socket]
+(defn- listen [ch socket transform]
   (go
     (try
       (loop []
         (let [datagram (DatagramPacket. (byte-array 1024) 1024)]
           (.receive socket datagram)
           (log/info "received something" (String. (.getData datagram)))
-          (>! ch {:origin datagram :message (String. (.getData datagram) 0 (.getLength datagram))}))
-        (recur))
+          ;; if transform is nil we are a server
+          (let [message (String. (.getData datagram) 0 (.getLength datagram))]
+            (>! ch (if (nil? transform)
+                     {:origin datagram
+                      :message message}
+                     (transform message)))))
+          (recur))
       (catch SocketException e
         (when-not (.isClosed socket)
           (log/info "exception" e))))))
@@ -25,7 +30,7 @@
   IConnection
 
   (send [this message]
-    (let [message-buffer (str (json/write-str message))
+    (let [message-buffer (json/write-str message)
           packet (DatagramPacket. (.getBytes message-buffer)
                                   (.length message-buffer)
                                   (localhost)
@@ -40,10 +45,10 @@
     (.close socket))
 
   (connect [this]
-    (listen receive-ch socket))
+    (listen receive-ch socket #(json/read-str % :key-fn keyword)))
 
   (bind [this]
-    (listen receive-ch socket)
+    (listen receive-ch socket nil)
 
     ;; reply loop
     (go-loop []

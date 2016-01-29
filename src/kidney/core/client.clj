@@ -1,6 +1,7 @@
 (ns kidney.core.client
+  (:import (java.util UUID))
   (:require [clojure.tools.logging :as log]
-            [clojure.core.async :refer (chan close! pub sub <!!)]))
+            [clojure.core.async :refer (chan close! pub sub <!! timeout)]))
 
 (defn discover [service]
   ["localhost:8080"])
@@ -11,24 +12,30 @@
   (request [this method parameters]))
 
 
-(defrecord Client [ch endpoints]
+(defrecord Client [connections]
   IClient
 
   (stop [this]
-    (doseq [connection endpoints]
-      (.close connection))
-    (close! ch))
+    (doseq [[connection ch] connections]
+      (.close connection)
+      (close! ch)))
 
   (request [this method parameters]
-    (.send (first endpoints) {:method method :parameters parameters})
-    (let [reply (<!! ch)]
-      (:message reply))))
+    (let [message-id (str (UUID/randomUUID))
+          [connection ch] (first connections)
+          chto (timeout 2000)]
+      (sub (pub ch :message-id) message-id chto)
+      (.send connection {:method method :parameters parameters :message-id message-id})
+      (let [reply (<!! chto)] 
+        (:result reply))))
+  )
 
 
 (defn client [service client-factory]
   (log/info "create client")
-  (let [ch (chan)
-        endpoints (discover service)
-        connections (doall (map #(client-factory ch %) endpoints))
-        c (->Client ch connections)]
-    c))
+  (let [endpoints (discover service)
+        connections (doall
+                     (map #(list (client-factory %1 %2) %1)
+                          (repeatedly #(chan))
+                          endpoints))]
+    (->Client connections)))

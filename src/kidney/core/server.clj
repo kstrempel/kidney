@@ -20,7 +20,8 @@
         (let [message (json/read-str (:message message-pure))
               method (get methods (get message "method"))]
           (>! send-ch {:origin (:origin message-pure)
-                       :message (method (get message "parameters"))}))
+                       :message {:result (method (get message "parameters"))
+                                 :message-id (get message "message-id")}}))
         (recur))))
 
   (stop [this]
