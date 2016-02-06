@@ -29,7 +29,7 @@
                           (catch Exception e
                             (assoc result
                                    :exception
-                                   {:type (str (class e))
+                                   {:type (.getName (class e))
                                     :message (str (.getMessage e))})))}))
         (recur))))
 

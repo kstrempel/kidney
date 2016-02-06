@@ -24,13 +24,17 @@
   (request [this method parameters]
     (let [message-id (str (UUID/randomUUID))
           [connection ch] (first connections)
-          chto (timeout 500)]
-      (sub (pub ch :message-id) message-id chto)
+          timeout-channel (timeout 500)]
+      (sub (pub ch :message-id) message-id timeout-channel)
       (.send connection {:method method :parameters parameters :message-id message-id})
       ;; when reply is nil timeout exception
-      (if-let [reply (<!! chto)]
+      (if-let [reply (<!! timeout-channel)]
+        ;; if message contains :exception throw remote error
         (if-let [exception (:exception reply)]
-          (throw (RemoteError. (str (:message reply))))
+          (let [exception-message (str (get-in reply [:exception :type]) ":"
+                                       (get-in reply [:exception :message]))]
+            (log/error "received remote error" exception-message)
+            (throw (RemoteError. exception-message)))
           (:result reply))
         (throw (Timeout. (str "Timeout of message " message-id)))
         )))
