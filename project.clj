@@ -8,5 +8,8 @@
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/tools.logging "0.3.1"]
                  [org.clojure/core.async "0.2.374"]]
-  :aot [kidney.core.exceptions kidney.interfaces kidney.transports.udp kidney.core.client]
+  :aot [kidney.core.exceptions.timeout
+        kidney.core.exceptions.remoteerror
+        kidney.interfaces
+        kidney.transports.udp kidney.core.client]
 )

@@ -1,6 +1,6 @@
 (ns kidney.core.client
   (:import (java.util UUID)
-           (kidney.core.exceptions Timeout))
+           (kidney.core.exceptions Timeout RemoteError))
   (:require [clojure.tools.logging :as log]
             [clojure.core.async :refer (chan close! pub sub <!! timeout)]))
 
@@ -28,8 +28,10 @@
       (sub (pub ch :message-id) message-id chto)
       (.send connection {:method method :parameters parameters :message-id message-id})
       ;; when reply is nil timeout exception
-      (if-let [reply (<!! chto)] 
-        (:result reply)
+      (if-let [reply (<!! chto)]
+        (if-let [exception (:exception reply)]
+          (throw (RemoteError. (str (:message reply))))
+          (:result reply))
         (throw (Timeout. (str "Timeout of message " message-id)))
         )))
   )

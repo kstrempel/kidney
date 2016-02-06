@@ -48,6 +48,7 @@
     (listen receive-ch socket #(json/read-str % :key-fn keyword)))
 
   (bind [this]
+    ;; listen loop
     (listen receive-ch socket nil)
 
     ;; reply loop
@@ -64,11 +65,13 @@
   (isAlive [this]
     (.isAlive socket)))
 
+
 (defn client-connect [receive-ch endpoint]
   (let [socket (DatagramSocket. 8081)
         c (->Connection receive-ch nil socket)]
     (.connect c)
     c))
+
 
 (defn server-serve [receive-ch send-ch endpoint]
   (let [socket (DatagramSocket. 8080)

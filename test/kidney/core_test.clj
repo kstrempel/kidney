@@ -1,5 +1,5 @@
 (ns kidney.core-test
-  (:import (kidney.core.exceptions Timeout))
+  (:import (kidney.core.exceptions Timeout RemoteError))
   (:require [clojure.test :refer :all]
             [kidney.transports.udp :refer [client-connect server-serve]]
             [kidney.core.client :as c]
@@ -26,5 +26,14 @@
           s (s/server "first" server-serve {"sleep" sleep-method})
           c (c/client "first" client-connect)]
       (is (thrown? Timeout (c/request c "sleep" {:span 1000})))
+      (c/stop c)
+      (s/stop s))))
+
+(deftest communicate-exception
+  (testing "Check communication with exception between client and server"
+    (let [div-method #(/ (get % "a") (get % "b"))
+          s (s/server "first" server-serve {"div" div-method})
+          c (c/client "first" client-connect)]
+      (is (thrown? RemoteError (c/request c "div" {:a 1 :b 0})))
       (c/stop c)
       (s/stop s))))

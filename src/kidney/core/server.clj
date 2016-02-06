@@ -16,12 +16,21 @@
   (start [this]
     (go-loop []
       (when-let [message-pure (<! receive-ch)]
-        (log/info "received message from async" message-pure)
+        (log/info "received message" message-pure)
         (let [message (json/read-str (:message message-pure))
-              method (get methods (get message "method"))]
-          (>! send-ch {:origin (:origin message-pure)
-                       :message {:result (method (get message "parameters"))
-                                 :message-id (get message "message-id")}}))
+              method (get methods (get message "method"))
+              result {:message-id (get message "message-id")}]
+          (>! send-ch
+              {:origin (:origin message-pure)
+               :message (try
+                          (assoc result
+                                 :result
+                                 (method (get message "parameters")))
+                          (catch Exception e
+                            (assoc result
+                                   :exception
+                                   {:type (str (class e))
+                                    :message (str (.getMessage e))})))}))
         (recur))))
 
   (stop [this]
