@@ -7,7 +7,8 @@
                  [zookeeper-clj "0.9.1"]
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/tools.logging "0.3.1"]
-                 [org.clojure/core.async "0.2.374"]]
+                 [org.clojure/core.async "0.2.374"]
+                 [org.eclipse.jetty/jetty-servlet "9.3.7.v20160115"]]
   :aot [kidney.core.exceptions.timeout
         kidney.core.exceptions.remoteerror
         kidney.interfaces
