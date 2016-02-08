@@ -66,15 +66,16 @@
     (.isAlive socket)))
 
 
-(defn client-connect [receive-ch endpoint]
+(defn client [service receive-ch endpoint]
   (let [socket (DatagramSocket. 8081)
         c (->Connection receive-ch nil socket)]
     (.connect c)
     c))
 
 
-(defn server-serve [receive-ch send-ch endpoint]
+(defn server [service receive-ch send-ch endpoint]
   (let [socket (DatagramSocket. 8080)
         c (->Connection receive-ch send-ch socket)]
     (.bind c)
     c))
+

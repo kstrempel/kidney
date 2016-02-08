@@ -47,7 +47,7 @@
         send-ch (chan)
         s (->Server receive-ch send-ch
                     ;; put receive-ch and send-ch in a defrecord for java
-                    (server-factory receive-ch send-ch "localhost:8080")
+                    (server-factory service receive-ch send-ch "localhost:8080")
                     methods)]
     (start s)
     s))
