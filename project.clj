@@ -9,9 +9,11 @@
                  [org.clojure/tools.logging "0.3.1"]
                  [org.clojure/core.async "0.2.374"]
                  [clj-http "2.0.1"]
-                 [org.eclipse.jetty/jetty-servlet "9.3.7.v20160115"]]
+                 [org.eclipse.jetty/jetty-servlet "9.2.14.v20151106"]]
   :aot [kidney.core.exceptions.timeout
         kidney.core.exceptions.remoteerror
         kidney.interfaces
-        kidney.transports.udp kidney.core.client]
+        kidney.transports.http-servlet
+        kidney.transports.udp
+        kidney.core.client]
 )

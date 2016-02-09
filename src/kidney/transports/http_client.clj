@@ -1,4 +1,5 @@
 (ns kidney.transports.http-client
+  (:refer-clojure :exclude [send read])
   (:require [kidney.interfaces :refer :all]
             [clojure.tools.logging :as log]
             [clojure.core.async :refer [go go-loop <! >!]]
@@ -26,8 +27,6 @@
   (isAlive [this]
     ;; ping server
     true)
-  
-
 )
 
 (defn client [service receive-ch endpoint]

@@ -1,4 +1,5 @@
 (ns kidney.transports.udp
+  (:refer-clojure :exclude [send read])
   (:import (java.net InetAddress DatagramPacket DatagramSocket SocketException))
   (:require [kidney.interfaces :refer :all]
             [clojure.tools.logging :as log]

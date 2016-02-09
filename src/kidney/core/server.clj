@@ -1,4 +1,6 @@
 (ns kidney.core.server
+  (:refer-clojure :exclude [send read])
+  (:import [kidney.interfaces IConnection])
   (:require [clojure.tools.logging :as log]
             [clojure.core.async :refer (chan close! go-loop go <! >!)]
             [clojure.data.json :as json]))
@@ -30,11 +32,11 @@
                             (assoc result
                                    :exception
                                    {:type (.getName (class e))
-                                    :message (str (.getMessage e))})))}))
+                                    :message (str (.getMessage ^Exception e))})))}))
         (recur))))
 
   (stop [this]
-    (.close connection)
+    (.close ^IConnection connection)
     (close! receive-ch)
     (close! send-ch))
 
