@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/kstrempel/kidney.svg?branch=master)](https://travis-ci.org/kstrempel/kidney)
+
 # kidney
 
 A microservice framework designed to use different protocols and transport methods
