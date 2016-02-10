@@ -14,6 +14,5 @@
         kidney.core.exceptions.remoteerror
         kidney.interfaces
         kidney.transports.http-servlet
-        kidney.transports.udp
         kidney.core.client]
 )

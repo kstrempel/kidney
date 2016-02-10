@@ -38,7 +38,8 @@
     (.setHandler server handler)
     (.addServletWithMapping handler KidneyServlet "/*")
     (.start server)
-    (reset! server& server)))
+    (reset! server& server)
+    (Thread/sleep 1000)))
 
 (defn stop-http []
   (log/info "stop http server")

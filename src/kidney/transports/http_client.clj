@@ -10,11 +10,12 @@
     IConnection
 
   (send [this message]
-    (let [message-buffer (json/write-str message)]
-      (future
-        (let [request (http/post
-                       (str "http://" endpoint "/" service)
-                       {:body message-buffer})]))))
+    (let [message-buffer (json/write-str message)
+          url (str "http://" endpoint "/")]
+      (log/info "request to" url "with message" message-buffer)
+      (let [request (http/get
+                     url)]
+        (>! received-ch request))))
 
   (disconnect [this])
 
