@@ -38,7 +38,7 @@ Server
 - [ ] multiple language interface
 
 Misc
-- [ ] travis CI
+- [x] travis CI
 - [ ] examples
 - [ ] submodels
 
