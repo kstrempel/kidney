@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [send read])
   (:require [kidney.interfaces :refer :all]
             [clojure.tools.logging :as log]
-            [clojure.core.async :refer [go go-loop <! >!]]
+            [clojure.core.async :refer [go go-loop <! >!!]]
             [clojure.data.json :as json]
             [clj-http.client :as http]))
 
@@ -11,11 +11,14 @@
 
   (send [this message]
     (let [message-buffer (json/write-str message)
-          url (str "http://" endpoint "/")]
+          url (str "http://" endpoint "/" service)]
       (log/info "request to" url "with message" message-buffer)
-      (let [request (http/get
-                     url)]
-        (>! received-ch request))))
+      (let [request (http/post
+                     url
+                     {:body message-buffer})
+            body (:body request)]
+        (log/info "received " request)
+        (>!! received-ch (json/read-str body :key-fn keyword)))))
 
   (disconnect [this])
 

@@ -23,7 +23,7 @@
               method (get methods (get message "method"))
               result {:message-id (get message "message-id")}]
           (>! send-ch
-              {:origin (:origin message-pure)
+              {:origin message-pure
                :message (try
                           (assoc result
                                  :result

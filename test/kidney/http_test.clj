@@ -21,8 +21,7 @@
           c (c/client "first" client)]
       (start-http)
       (is (= (c/request c "add" {:a 1 :b 2}) 3))
-      (Thread/sleep 50000)
-;;      (stop-http)
+      (stop-http)
       (c/stop c)
       (s/stop s))))
 

@@ -31,13 +31,15 @@
                          :message-id message-id})
       ;; when reply is nil timeout exception
       (if-let [reply (<!! timeout-channel)]
-        ;; if message contains :exception throw remote error
-        (if-let [exception (:exception reply)]
-          (let [exception-message (str (get-in reply [:exception :type]) ":"
-                                       (get-in reply [:exception :message]))]
-            (log/error "received remote error" exception-message)
-            (throw (RemoteError. exception-message)))
-          (:result reply))
+        (do
+          (println "client received " reply)
+          ;; if message contains :exception throw remote error
+          (if-let [exception (:exception reply)]
+            (let [exception-message (str (get-in reply [:exception :type]) ":"
+                                         (get-in reply [:exception :message]))]
+              (log/error "received remote error" exception-message)
+              (throw (RemoteError. exception-message)))
+            (:result reply)))
         (throw (Timeout. (str "Timeout of message " message-id))))))
   )
 
