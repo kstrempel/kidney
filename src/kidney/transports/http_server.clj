@@ -7,7 +7,7 @@
             [kidney.transports.http-servlet :refer [servlet-channel-out
                                                     servlet-channel-in]]
             [clojure.tools.logging :as log]
-            [clojure.core.async :refer [go go-loop <! >! pub sub chan]]
+            [clojure.core.async :refer [go go-loop <! >! pub sub chan close!]]
             [clojure.data.json :as json]))
 
 (def ^:dynamic server& (atom nil))
@@ -25,36 +25,39 @@
 
   (bind [this]
     (go
-      (let [ch (sub (pub servlet-channel-out :service)
+      (let [ch (sub (pub @servlet-channel-out :service)
                     (keyword service) (chan))]
         (loop []
-          (let [message (<! ch)]
+          (when-let [message (<! ch)]
             (>! receive-ch message)
             (when-let [result (<! send-ch)]
-              (>! servlet-channel-in (:message result))))
+              (>! @servlet-channel-in (:message result))))
           (recur)))))
 
   (isAlive [this]
     ;; ping server
     true)
   )
-
+1
 (defn server [service receive-ch send-ch endpoint]
   (let [connection (->Connection service receive-ch send-ch)]
     (.bind connection)
     connection))
 
 (defn start-http []
+  (reset! servlet-channel-out (chan))
+  (reset! servlet-channel-in (chan))
   (log/info "start http server")
-  (let [server (Server. 8080)
+  (let [server (Server. 9999)
         handler (ServletHandler.)]
     (.setHandler server handler)
     (.addServletWithMapping handler KidneyServlet "/*")
     (.start server)
-    (reset! server& server)
-    (Thread/sleep 1000)))
+    (reset! server& server)))
 
 (defn stop-http []
   (log/info "stop http server")
   (.stop @server&)
-  (.join @server&))
+  (.join @server&)
+  (close! @servlet-channel-out)
+  (close! @servlet-channel-in))

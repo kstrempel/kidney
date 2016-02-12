@@ -17,7 +17,7 @@
                      url
                      {:body message-buffer})
             body (:body request)]
-        (log/info "received " request)
+        (log/info "got answer " request)
         (>!! received-ch (json/read-str body :key-fn keyword)))))
 
   (disconnect [this])

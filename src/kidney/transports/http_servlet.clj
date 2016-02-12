@@ -9,14 +9,15 @@
 (gen-class :name kidney.transports.http-servlet.KidneyServlet
            :extends javax.servlet.http.HttpServlet)
 
-(defonce servlet-channel-out (chan))
-(defonce servlet-channel-in (chan))
+(def servlet-channel-out (atom nil))
+(def servlet-channel-in (atom nil))
 
 (defn parse-body [request]
   (with-open [rdr (.getReader request)]
     (reduce str "" (line-seq rdr))))
 
 (defn -doPost [this ^HttpServletRequest request ^HttpServletResponse response]
+  (log/info "servlet got request")
   (doto response
     (.setContentType "application/json")
     (.setStatus HttpServletResponse/SC_OK))
@@ -25,5 +26,7 @@
         ch (chan)
         request-message {:service (keyword service)
                          :message request-body}]
-    (>!! servlet-channel-out request-message)
-    (.println (.getWriter response) (json/write-str (<!! servlet-channel-in)))))
+    (log/info "received message" request-body)
+    (>!! @servlet-channel-out request-message)
+    (when-let [result (<!! @servlet-channel-in)]
+      (.println (.getWriter response) (json/write-str result)))))

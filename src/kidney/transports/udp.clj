@@ -60,7 +60,8 @@
           (log/info "Messsage to reply" message)
           (.send socket (DatagramPacket. (.getBytes payload)
                                          (.length payload)
-                                         (.getSocketAddress (:origin message))))
+                                         (.getSocketAddress (:origin
+                                                              (:origin message)))))
           (recur)))))
 
   (isAlive [this]

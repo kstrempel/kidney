@@ -5,7 +5,7 @@
             [clojure.core.async :refer (chan close! pub sub <!! timeout)]))
 
 (defn discover [service]
-  ["localhost:8080"])
+  ["localhost:9999"])
 
 
 (defprotocol IClient
@@ -31,15 +31,13 @@
                          :message-id message-id})
       ;; when reply is nil timeout exception
       (if-let [reply (<!! timeout-channel)]
-        (do
-          (println "client received " reply)
           ;; if message contains :exception throw remote error
           (if-let [exception (:exception reply)]
             (let [exception-message (str (get-in reply [:exception :type]) ":"
                                          (get-in reply [:exception :message]))]
               (log/error "received remote error" exception-message)
               (throw (RemoteError. exception-message)))
-            (:result reply)))
+            (:result reply))
         (throw (Timeout. (str "Timeout of message " message-id))))))
   )
 
