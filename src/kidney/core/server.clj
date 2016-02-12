@@ -1,4 +1,6 @@
 (ns kidney.core.server
+  (:refer-clojure :exclude [send read])
+  (:import [kidney.interfaces IConnection])
   (:require [clojure.tools.logging :as log]
             [clojure.core.async :refer (chan close! go-loop go <! >!)]
             [clojure.data.json :as json]))
@@ -21,7 +23,7 @@
               method (get methods (get message "method"))
               result {:message-id (get message "message-id")}]
           (>! send-ch
-              {:origin (:origin message-pure)
+              {:origin message-pure
                :message (try
                           (assoc result
                                  :result
@@ -30,11 +32,11 @@
                             (assoc result
                                    :exception
                                    {:type (.getName (class e))
-                                    :message (str (.getMessage e))})))}))
+                                    :message (str (.getMessage ^Exception e))})))}))
         (recur))))
 
   (stop [this]
-    (.close connection)
+    (.close ^IConnection connection)
     (close! receive-ch)
     (close! send-ch))
 
@@ -47,7 +49,7 @@
         send-ch (chan)
         s (->Server receive-ch send-ch
                     ;; put receive-ch and send-ch in a defrecord for java
-                    (server-factory receive-ch send-ch "localhost:8080")
+                    (server-factory service receive-ch send-ch "localhost:8080")
                     methods)]
     (start s)
     s))

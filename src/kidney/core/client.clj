@@ -5,7 +5,7 @@
             [clojure.core.async :refer (chan close! pub sub <!! timeout)]))
 
 (defn discover [service]
-  ["localhost:8080"])
+  ["localhost:9999"])
 
 
 (defprotocol IClient
@@ -26,18 +26,19 @@
           [connection ch] (first connections)
           timeout-channel (timeout 500)]
       (sub (pub ch :message-id) message-id timeout-channel)
-      (.send connection {:method method :parameters parameters :message-id message-id})
+      (.send connection {:method method
+                         :parameters parameters
+                         :message-id message-id})
       ;; when reply is nil timeout exception
       (if-let [reply (<!! timeout-channel)]
-        ;; if message contains :exception throw remote error
-        (if-let [exception (:exception reply)]
-          (let [exception-message (str (get-in reply [:exception :type]) ":"
-                                       (get-in reply [:exception :message]))]
-            (log/error "received remote error" exception-message)
-            (throw (RemoteError. exception-message)))
-          (:result reply))
-        (throw (Timeout. (str "Timeout of message " message-id)))
-        )))
+          ;; if message contains :exception throw remote error
+          (if-let [exception (:exception reply)]
+            (let [exception-message (str (get-in reply [:exception :type]) ":"
+                                         (get-in reply [:exception :message]))]
+              (log/error "received remote error" exception-message)
+              (throw (RemoteError. exception-message)))
+            (:result reply))
+        (throw (Timeout. (str "Timeout of message " message-id))))))
   )
 
 
@@ -45,7 +46,7 @@
   (log/info "create client")
   (let [endpoints (discover service)
         connections (doall
-                     (map #(list (client-factory %1 %2) %1)
+                     (map #(list (client-factory service %1 %2) %1)
                           (repeatedly #(chan))
                           endpoints))]
     (->Client connections)))

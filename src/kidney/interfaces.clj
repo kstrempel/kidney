@@ -1,4 +1,5 @@
-(ns kidney.interfaces)
+(ns kidney.interfaces
+  (:refer-clojure :exclude [read send]))
 
 (defprotocol IMessage
   (read [message])

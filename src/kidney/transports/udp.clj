@@ -1,4 +1,5 @@
 (ns kidney.transports.udp
+  (:refer-clojure :exclude [send read])
   (:import (java.net InetAddress DatagramPacket DatagramSocket SocketException))
   (:require [kidney.interfaces :refer :all]
             [clojure.tools.logging :as log]
@@ -59,22 +60,24 @@
           (log/info "Messsage to reply" message)
           (.send socket (DatagramPacket. (.getBytes payload)
                                          (.length payload)
-                                         (.getSocketAddress (:origin message))))
+                                         (.getSocketAddress (:origin
+                                                              (:origin message)))))
           (recur)))))
 
   (isAlive [this]
     (.isAlive socket)))
 
 
-(defn client-connect [receive-ch endpoint]
+(defn client [service receive-ch endpoint]
   (let [socket (DatagramSocket. 8081)
         c (->Connection receive-ch nil socket)]
     (.connect c)
     c))
 
 
-(defn server-serve [receive-ch send-ch endpoint]
+(defn server [service receive-ch send-ch endpoint]
   (let [socket (DatagramSocket. 8080)
         c (->Connection receive-ch send-ch socket)]
     (.bind c)
     c))
+
