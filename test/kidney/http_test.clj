@@ -7,8 +7,8 @@
             [kidney.core.server :as s]))
 
 (deftest create-all-clients
-  (start-http)
   (testing "Check if the client is creating all clients"
+    (start-http)
     (let [c (c/client "first" client)]
       (is (= (count (:connections c)) 1))
       (stop-http)
