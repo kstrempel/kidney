@@ -24,7 +24,7 @@
   (request [this method parameters]
     (let [message-id (str (UUID/randomUUID))
           [connection ch] (first connections)
-          timeout-channel (timeout 500)]
+          timeout-channel (timeout 1000)]
       (sub (pub ch :message-id) message-id timeout-channel)
       (.send connection {:method method
                          :parameters parameters
