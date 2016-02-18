@@ -9,12 +9,12 @@
             [clj-time.local :as l]
             [clj-time.core :as t]))
 
-(defn http-test-fixtures [f]
+(defn http-fixtures [f]
   (start-http)
   (f)
   (stop-http))
 
-(use-fixtures :each http-test-fixtures)
+(use-fixtures :each http-fixtures)
 
 (deftest create-all-clients
   (testing "Check if the client is creating all clients"
