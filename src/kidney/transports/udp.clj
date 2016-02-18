@@ -3,7 +3,7 @@
   (:import (java.net InetAddress DatagramPacket DatagramSocket SocketException))
   (:require [kidney.interfaces :refer :all]
             [clojure.tools.logging :as log]
-            [clojure.core.async :refer [go go-loop <! >!]]
+            [clojure.core.async :refer [go go-loop close! <! >!]]
             [clojure.data.json :as json]))
 
 (defn localhost [] (. InetAddress getLocalHost))
@@ -27,7 +27,7 @@
           (log/info "exception" e))))))
 
 
-(deftype Connection [receive-ch send-ch socket]
+(deftype Connection [received-ch send-ch socket]
   IConnection
 
   (send [this message]
@@ -38,19 +38,21 @@
                                   8080)]
       (.send socket packet)))
 
-
   (disconnect [this]
     (.disconnect socket))
 
   (close [this]
+    (close! received-ch)
+    (when send-ch
+      (close! send-ch))
     (.close socket))
 
   (connect [this]
-    (listen receive-ch socket #(json/read-str % :key-fn keyword)))
+    (listen received-ch socket #(json/read-str % :key-fn keyword)))
 
   (bind [this]
     ;; listen loop
-    (listen receive-ch socket nil)
+    (listen received-ch socket nil)
 
     ;; reply loop
     (go-loop []
@@ -68,16 +70,16 @@
     (.isAlive socket)))
 
 
-(defn client [service receive-ch endpoint]
+(defn client [service received-ch endpoint]
   (let [socket (DatagramSocket. 8081)
-        c (->Connection receive-ch nil socket)]
+        c (->Connection received-ch nil socket)]
     (.connect c)
     c))
 
 
-(defn server [service receive-ch send-ch endpoint]
+(defn server [service received-ch send-ch endpoint]
   (let [socket (DatagramSocket. 8080)
-        c (->Connection receive-ch send-ch socket)]
+        c (->Connection received-ch send-ch socket)]
     (.bind c)
     c))
 

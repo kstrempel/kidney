@@ -22,17 +22,18 @@
         (let [message (json/read-str (:message message-pure))
               method (get methods (get message "method"))
               result {:message-id (get message "message-id")}]
-          (>! send-ch
-              {:origin message-pure
-               :message (try
-                          (assoc result
-                                 :result
-                                 (method (get message "parameters")))
-                          (catch Exception e
+          (go
+            (>! send-ch
+                {:origin message-pure
+                 :message (try
                             (assoc result
-                                   :exception
-                                   {:type (.getName (class e))
-                                    :message (str (.getMessage ^Exception e))})))}))
+                                   :result
+                                   (method (get message "parameters")))
+                            (catch Exception e
+                              (assoc result
+                                     :exception
+                                     {:type (.getName (class e))
+                                      :message (str (.getMessage ^Exception e))})))})))
         (recur))))
 
   (stop [this]

@@ -20,7 +20,7 @@ Protocols
 
 Transports
 - [x] UDP
-- [ ] HTTP
+- [x] HTTP
 - [ ] TCP
 
 Discover

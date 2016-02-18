@@ -1,8 +1,7 @@
 (ns kidney.http-test
   (:import (kidney.core.exceptions Timeout RemoteError))
   (:require [clojure.test :refer :all]
-            [kidney.transports.http-server :refer [server
-                                                   start-http stop-http]]
+            [kidney.transports.http-server :refer [server start-http stop-http]]
             [kidney.transports.http-client :refer [client]]
             [kidney.core.client :as c]
             [kidney.core.server :as s]
@@ -57,8 +56,10 @@
                         (+ (get % "a") (get % "b")))
           s (s/server "first" server {"add" add-method})
           c (c/client "first" client)
-          f1 (future (c/request c "add" {:a 1 :b 2 :span 110}))
-          f2 (future (c/request c "add" {:a 2 :b 2 :span 100}))]
+          f1 (future (c/request c "add" {:a 1 :b 2 :span 100}))
+          f2 (future (do
+                       (Thread/sleep 20)
+                       (c/request c "add" {:a 2 :b 2 :span 1})))]
       (is (= @f1 3))
       (is (= @f2 4))
       (c/stop c)
