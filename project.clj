@@ -14,6 +14,5 @@
   :aot [kidney.core.exceptions.timeout
         kidney.core.exceptions.remoteerror
         kidney.interfaces
-        kidney.transports.http-servlet
         kidney.core.client]
 )
