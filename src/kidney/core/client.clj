@@ -7,11 +7,9 @@
 (defn discover [service]
   ["localhost:9999"])
 
-
 (defprotocol IClient
   (stop [this])
   (request [this method parameters]))
-
 
 (defrecord Client [connections]
   IClient

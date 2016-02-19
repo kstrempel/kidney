@@ -19,10 +19,10 @@
     (go-loop []
       (when-let [message-pure (<! received-ch)]
         (log/info "received message" message-pure)
-        (let [message (json/read-str (:message message-pure))
-              method (get methods (get message "method"))
-              result {:message-id (get message "message-id")}]
-          (go
+        (go
+          (let [message (json/read-str (:message message-pure))
+                method (get methods (get message "method"))
+                result {:message-id (get message "message-id")}]
             (>! send-ch
                 {:origin message-pure
                  :message (try
@@ -37,6 +37,7 @@
         (recur))))
 
   (stop [this]
+    (log/info "stop server")
     (.close ^IConnection connection)
     (close! received-ch)
     (close! send-ch))

@@ -24,8 +24,6 @@
             (catch org.apache.http.NoHttpResponseException e
               (log/info "post request to" url "failed"))))))
 
-  (disconnect [this])
-
   (close [this]
     (close! received-ch))
 

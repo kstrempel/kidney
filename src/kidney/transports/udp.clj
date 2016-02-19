@@ -38,14 +38,11 @@
                                   8080)]
       (.send socket packet)))
 
-  (disconnect [this]
-    (.disconnect socket))
-
   (close [this]
-    (close! received-ch)
+    (.close socket)
     (when send-ch
-      (close! send-ch))
-    (.close socket))
+      (close! send-ch)
+      (close! received-ch)))
 
   (connect [this]
     (listen received-ch socket #(json/read-str % :key-fn keyword)))

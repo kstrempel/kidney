@@ -19,8 +19,6 @@
 
   (send [this message])
 
-  (disconnect [this])
-
   (close [this])
 
   (connect [this])
