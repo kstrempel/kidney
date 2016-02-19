@@ -1,6 +1,6 @@
 (defproject kidney "0.3.0-SNAPSHOT"
   :description "Microservice core framework"
-  :url "http://example.com/FIXME"
+  :url "http://github.com/kstrempel/kidney"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
@@ -9,10 +9,10 @@
                  [org.clojure/tools.logging "0.3.1"]
                  [org.clojure/core.async "0.2.374"]
                  [clj-http "2.0.1"]
-                 [org.eclipse.jetty/jetty-servlet "9.2.14.v20151106"]]
+                 [org.eclipse.jetty/jetty-servlet "9.2.14.v20151106"]
+                 [clj-time "0.11.0"]]
   :aot [kidney.core.exceptions.timeout
         kidney.core.exceptions.remoteerror
         kidney.interfaces
-        kidney.transports.http-servlet
         kidney.core.client]
 )

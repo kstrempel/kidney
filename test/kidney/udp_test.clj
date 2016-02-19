@@ -8,32 +8,44 @@
 (deftest create-all-clients
   (testing "Check if the client is creating all clients"
     (let [c (c/client "first" client)]
-      (is (= (count (:connections c)) 1))
-      (c/stop c))))
+      (try
+        (is (= (count (:connections c)) 1))
+        (finally
+          (c/stop c)
+          (Thread/sleep 100))))))
 
 (deftest communicate
   (testing "Check communication between client and server"
     (let [add-method #(+ (get % "a") (get % "b"))
           s (s/server "first" server {"add" add-method})
           c (c/client "first" client)]
-      (is (= (c/request c "add" {:a 1 :b 2}) 3))
-      (c/stop c)
-      (s/stop s))))
+      (try
+        (is (= (c/request c "add" {:a 1 :b 2}) 3))
+        (finally
+          (c/stop c)
+          (s/stop s)
+          (Thread/sleep 100))))))
 
 (deftest communicate-timeout
   (testing "Check communication with timeout between client and server"
     (let [sleep-method #(Thread/sleep (get % "span"))
           s (s/server "first" server {"sleep" sleep-method})
           c (c/client "first" client)]
-      (is (thrown? Timeout (c/request c "sleep" {:span 1000})))
-      (c/stop c)
-      (s/stop s))))
+      (try
+        (is (thrown? Timeout (c/request c "sleep" {:span 1000})))
+        (finally
+          (c/stop c)
+          (s/stop s)
+          (Thread/sleep 100))))))
 
 (deftest communicate-exception
   (testing "Check communication with exception between client and server"
     (let [div-method #(/ (get % "a") (get % "b"))
           s (s/server "first" server {"div" div-method})
           c (c/client "first" client)]
-      (is (thrown? RemoteError (c/request c "div" {:a 1 :b 0})))
-      (c/stop c)
-      (s/stop s))))
+      (try
+        (is (thrown? RemoteError (c/request c "div" {:a 1 :b 0})))
+        (finally
+          (c/stop c)
+          (s/stop s)
+          (Thread/sleep 100))))))

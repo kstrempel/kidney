@@ -11,7 +11,6 @@
 (defprotocol IConnection
   (send [this message])
   (connect [this])
-  (disconnect [this])
   (bind [this])
   (close [this])
   (isAlive [this]))
