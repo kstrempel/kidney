@@ -14,12 +14,15 @@
         (let [message-buffer (json/write-str message)
               url (str "http://" endpoint "/" service)]
           (log/info "request to" url "with message" message-buffer)
-          (let [request (http/post
-                         url
-                         {:body message-buffer})
-                body (:body request)]
-            (log/info "got answer " request)
-            (>! received-ch (json/read-str body :key-fn keyword))))))
+          (try
+            (let [request (http/post
+                           url
+                           {:body message-buffer})
+                  body (:body request)]
+              (log/info "got answer " request)
+              (>! received-ch (json/read-str body :key-fn keyword)))
+            (catch org.apache.http.NoHttpResponseException e
+              (log/info "post request to" url "failed"))))))
 
   (disconnect [this])
 

@@ -12,12 +12,12 @@
   (receive [this]))
 
 
-(defrecord Server [receive-ch send-ch connection methods]
+(defrecord Server [received-ch send-ch connection methods]
   IServer
 
   (start [this]
     (go-loop []
-      (when-let [message-pure (<! receive-ch)]
+      (when-let [message-pure (<! received-ch)]
         (log/info "received message" message-pure)
         (let [message (json/read-str (:message message-pure))
               method (get methods (get message "method"))
@@ -38,7 +38,7 @@
 
   (stop [this]
     (.close ^IConnection connection)
-    (close! receive-ch)
+    (close! received-ch)
     (close! send-ch))
 
   (receive [this]))
@@ -46,11 +46,11 @@
 
 (defn server [service server-factory methods]
   (log/info "create server")
-  (let [receive-ch (chan)
+  (let [received-ch (chan)
         send-ch (chan)
-        s (->Server receive-ch send-ch
-                    ;; put receive-ch and send-ch in a defrecord for java
-                    (server-factory service receive-ch send-ch "localhost:8080")
+        s (->Server received-ch send-ch
+                    ;; put received-ch and send-ch in a defrecord for java
+                    (server-factory service received-ch send-ch "localhost:8080")
                     methods)]
     (start s)
     s))
